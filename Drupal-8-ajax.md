@@ -10,13 +10,13 @@ Ajax (Asynchronous Javascript and XML — «асинхронный JavaScript и
 3. На стороне сервера, по пути, на которую ссылается гиперссылка, вызывается контролер, который выполняет все необходимые действия, генерирует список команд и возвращает формате JSON.
 4. Скрипт получает набор команд и поочередно выполняет их.
 
-А теперь подробнее разберем выше описанный процесс.
+А теперь подробнее разберем выше описанный процесс на примере отображения сообщения по клику на ссылку.
 
 
 ### Часть 1: Создание гиперссылок и автоматическая отправка запроса.
 
 Гиперссылки вы можете создать любым удобным способом (добавив ссылки из текстового редактора, описав в файле шаблона TWIG или создав программный блок с текстом...). Важны 2 фактора:
-1. наличи аттрибута href, где указан URL, который должен обработать AJAX запрос
+1. наличи аттрибута href, где указан URL, который должен обработать AJAX запрос;
 2. класс use-ajax, который является "индикатором" того, что клик по данной ссылке должен быть обработан скриптом.
 
 Но есть один ньюанс, для корректной обработки AJAX ссылок, необходимо, чтобы на странице, где выводится данная ссылка, была подключена библиотека core/drupal.ajax (core/misc/ajax.js). Для решения этой задачи есть несколько способов.
@@ -51,4 +51,57 @@ function mymodule_page_alter(&$page) {
 ### Часть 2: Обработка запроса.
 
 Как уже было ранее сказано, после того, как произошло событие клика на ссылку, выполняется запрос по URL, который указан в аттрибуте href. Для обработки запроса нам нужно создать контроллер, который будет вызываться по обращению на указанный URL.
+
+Для начала "расскажем" Drupal-у о том, что по указанной ссылке.
+Создаем модуль: для примера допустим, что наш модуль называется cusom_ajax, контролер обработчика будет доступен по адресу /ajax/show-message.
+
+Создаем папку custom_ajax в modules/custom/.
+Добавляем файл опсиания custom_ajax.info.yml
+
+```
+name: Custom ajax
+description: 'My first module'
+type: module
+core: 8.x
+```
+
+Теперь описываем новую страницу с помощью файла custom_ajax.routing.yml
+
+```
+custom_ajax.ajax:
+  path: '/ajax/show-message'
+  defaults:
+    _controller: '\Drupal\cusom_ajax\Controller\CustomAjaxController::ajax_show_message'
+  requirements:
+    _permission: 'access content'
+```
+
+Этим файлом "указали" Drupal-у следующую инструкцию: при обращении по пути /ajax/show-message необходимо вывзвать метод ajax_show_message который находится в классе CustomAjaxController. А так же указали путь, где находится указанный класс (в нашем случае это /modules/custom/custom_ajax/src/Controller/CustomAjaxController.php).
+
+```
+namespace Drupal\cusom_ajax\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AlertCommand;
+
+/**
+ * Определяем контролер CustomAjaxController.
+ */
+class CustomAjaxController extends ControllerBase {
+
+  public function ajax_show_message() {
+    // Создаем экземпляр класса AjaxResponse().
+    $response = new AjaxResponse();
+
+    // Добавляем команду js: alert().
+    $response->addCommand(new AlertCommand('Hello world'));
+
+    //Возвращаем набор команд для выполнения.
+    return $response;
+  }
+
+}
+
+```
 
