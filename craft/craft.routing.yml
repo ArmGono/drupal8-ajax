@@ -1,0 +1,6 @@
+craft.ajax:
+  path: '/ajax/craft/cards/{node}'
+  defaults:
+    _controller: '\Drupal\craft\Controller\CraftController::inside_ajax_content'
+  requirements:
+    _permission: 'access content'

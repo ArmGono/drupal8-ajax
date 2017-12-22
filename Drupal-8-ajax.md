@@ -79,8 +79,10 @@ custom_ajax.ajax:
 Этим файлом "указали" Drupal-у следующую инструкцию: при обращении по пути /ajax/show-message необходимо вывзвать метод ajax_show_message который находится в классе CustomAjaxController. А так же указали путь, где находится указанный класс (в нашем случае это /modules/custom/custom_ajax/src/Controller/CustomAjaxController.php).
 
 ```
+// Определяем область видимости нашего класса.
 namespace Drupal\cusom_ajax\Controller;
 
+// Указываем зависимости.
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AlertCommand;

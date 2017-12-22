@@ -1,0 +1,6 @@
+name: Crafter site main module
+description: 'Custom blocks, pages, Hooks and alters'
+type: module
+core: 8.x
+version: 1.0
+package: Voodoo

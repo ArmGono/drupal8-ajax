@@ -1,0 +1,17 @@
+<?php
+
+function craft_entity_view_alter(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  $bundle = $entity->bundle();
+  if ($entity->bundle() == 'num_img' && $entity->getEntityTypeId() == 'paragraph') {
+    if (isset($build['field_icon'])) {
+      $icon_id = $build['field_icon'][0]['#context']['value'];
+      $icon = '<span class="use-svg" data-svg-name="' . $icon_id . '"></span>';
+      $build['field_icon'][0] = [
+        '#markup' => $icon
+      ];
+    }
+  }
+  elseif (($bundle == 'news' || $bundle == 'service_inline') && $entity->getEntityTypeId() == 'node' && $display->getMode() == 'teaser') {
+    $build['#attached']['library'][] = 'craft/craft.commands';
+  }
+}
