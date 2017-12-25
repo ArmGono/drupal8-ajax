@@ -125,7 +125,7 @@ class CustomAjaxController extends ControllerBase {
 * DataCommand - выполняет команду jQuery.data();
 * InsertCommand - выполняет команду jQuery.insert();
 * RemoveCommand - выполняет команду jQuery.remove();
-* ReplaceCommand - выполняет команду jQuery.replace().
+* ReplaceCommand - выполняет команду jQuery.replaceWith().
 
 Полный список команд можно посмотреть тут https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x.
 
