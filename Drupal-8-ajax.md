@@ -125,7 +125,7 @@ class CustomAjaxController extends ControllerBase {
 * DataCommand - выполняет команду jQuery.data();
 * InsertCommand - выполняет команду jQuery.insert();
 * RemoveCommand - выполняет команду jQuery.remove();
-* ReplaceCommand - выполняет команду jQuery.replace();
+* ReplaceCommand - выполняет команду jQuery.replace().
 
 Полный список команд можно посмотреть тут https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x.
 
@@ -176,6 +176,7 @@ class ScrollToCommand implements CommandInterface {
 ```
 
 Теперь создадим файл с реализацией комманды и разместим его в папке js в корне нашего модуля. Добавим новый метод в Drupal.AjaxCommands.
+
 
 ```
 (function ($, Drupal) {
