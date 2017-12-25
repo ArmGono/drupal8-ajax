@@ -37,7 +37,7 @@ $output['#attached']['library'][] = 'core/drupal.ajax';
 ```
 function mymodule_page_alter(&$page) {
   if(***ATTACH CONDITIONS***){
-    $page['#attached']['library'][] = 'foobar/foobar-corescripts';
+    $page['#attached']['library'][] = 'core/drupal.ajax';
   }
 }
 ```
@@ -107,3 +107,26 @@ class CustomAjaxController extends ControllerBase {
 
 ```
 
+Включаем модуль, выполняем клик на ссылку и получаем alert окно с текстом Hello World.
+
+В примере мы использовали только команду AlertCommand(). В ядре Drupal-а есть набор предустановленных комманд. вот некоторые из них:
+
+* AlertCommand - вызывает alert();
+* RedirectCommand - выполняет ajax перенаправление;
+* AddCssCommand - добавляет css на страницу;
+* InvokeCommand - выполняет пользовательскую команду jQuery;
+* CssCommand - выполняет команду jQuery.css();
+* AfterCommand - выполняет команду jQuery.after();
+* BeforeCommand - выполняет команду jQuery.before();
+* AppendCommand - выполняет команду jQuery.append();
+* PrependCommand - выполняет команду jQuery.prepend();
+* ChangedCommand - отмечает элемент классом "ajax-changed";
+* HtmlCommand - выполняет команду jQuery.html();
+* DataCommand - выполняет команду jQuery.data();
+* InsertCommand - выполняет команду jQuery.insert();
+* RemoveCommand - выполняет команду jQuery.remove();
+* ReplaceCommand - выполняет команду jQuery.replace();
+
+Полный список комманд можно посмотреть тут https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x.
+
+### Часть 3: Создаем сво.
