@@ -2,7 +2,7 @@ Ajax (Asynchronous Javascript and XML — «асинхронный JavaScript и
 
 Но наша цель не изучение самой технологии AJAX, а его практическое применение в CMS Drupal 8 (далее Drupal). В связи с этим рекомендуется перед началом изучения статьи, ознакомиться c AJAX подходом.
 
-В "ядре" Drupal реализован инструментарий для работы с наиболее часто встречающимися AJAX командами а так же предусмотрена возможность создания своих комманд, для решения конкретной задачи.
+В "ядре" Drupal реализован инструментарий для работы с наиболее часто встречающимися AJAX командами а так же предусмотрена возможность создания своих команд, для решения конкретной задачи.
 Общий алгоритм взаимодействия следующий:
 
 1. Создается гиперссылка с классом "use-ajax"
@@ -82,7 +82,7 @@ custom_ajax.ajax:
 // Определяем область видимости нашего класса.
 namespace Drupal\cusom_ajax\Controller;
 
-// Указываем зависимости.
+// Импортируем зависимости.
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\AlertCommand;
@@ -109,7 +109,7 @@ class CustomAjaxController extends ControllerBase {
 
 Включаем модуль, выполняем клик на ссылку и получаем alert окно с текстом Hello World.
 
-В примере мы использовали только команду AlertCommand(). В ядре Drupal-а есть набор предустановленных комманд. вот некоторые из них:
+В примере мы использовали только команду AlertCommand(). В ядре Drupal-а есть набор предустановленных команд. вот некоторые из них:
 
 * AlertCommand - вызывает alert();
 * RedirectCommand - выполняет ajax перенаправление;
@@ -127,6 +127,116 @@ class CustomAjaxController extends ControllerBase {
 * RemoveCommand - выполняет команду jQuery.remove();
 * ReplaceCommand - выполняет команду jQuery.replace();
 
-Полный список комманд можно посмотреть тут https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x.
+Полный список команд можно посмотреть тут https://api.drupal.org/api/drupal/core%21core.api.php/group/ajax/8.2.x.
 
-### Часть 3: Создаем сво.
+### Часть 3: Создаем свои команды.
+
+Встроенные команды дают широкие возможности, но иногда бывает необходимо выполнить определенный набор действий отличающихся от предустановленных. Попытка решить задачу реализовав ее встроенными командами чаще всего приводит к нечитаемому и не расширяемому коду или вообще оказывается невозможной... Для подобных случаев предусмотрена возможность создания своих комманд.
+
+Для примера создадим команду прокрутки до определенного элемента на странице со сдвигом на указанное кол-во px.
+
+Для начала опишем нашу команду. Создаем файл src/Ajax/ScrollToCommand.php и опишем класс ScrollToCommand.
+
+```
+<?php
+// Определяем область видимости.
+namespace Drupal\craft\Ajax;
+
+// Импортируем зависимости.
+use Drupal\Core\Ajax\CommandInterface;
+
+class ScrollToCommand implements CommandInterface {
+
+  // Описываем необходимые переменные.
+  protected $selector;
+  protected $offset;
+  protected $speed;
+
+  // Присваивем переменным значение при создании объекта класса.
+  public function __construct($selector, $offset = 0, $speed = 500) {
+    $this->selector = $selector;
+    $this->offset = $offset;
+    $this->speed = $speed;
+  }
+
+  /**
+   * Выполняем Drupal\Core\Ajax\CommandInterface:render().
+   */
+  public function render() {
+    return array(
+      'command' => 'scrollTo',
+      'selector' => $this->selector,
+      'offset' => $this->offset,
+      'speed' => $this->speed,
+    );
+  }
+
+}
+
+```
+
+Теперь создадим файл с реализацией комманды и разместим его в папке js в корне нашего модуля. Добавим новый метод в Drupal.AjaxCommands.
+
+```
+(function ($, Drupal) {
+  /**
+   * Добавим новыую команду scrollTo.
+   */
+  Drupal.AjaxCommands.prototype.scrollTo = function (ajax, response, status) {
+    // Проверяем наличие селектора в переданных данных.
+    if (!response.selector) {
+      return;
+    }
+
+    // Находим необходимый элемент и проверяем существует элемент на странице или нет.
+    var $wrapper = $(response.selector);
+    if(!$wrapper.length){
+      return;
+    }
+    // Высчитываем положение элемента и необходимый сдвиг.
+    var top = $wrapper.offset().top;
+    var offset = response.offset ? response.offset : 0;
+
+    // Получаем скорость скорллинга.
+    var speed = responce.spped ? responce.spped : 500;
+    // Прокручиваем страницу до высчитанной точки.
+    $('html,body').stop().animate({
+      scrollTop: top + offset
+    }, speed);
+  }
+})(jQuery, Drupal);
+```
+
+В параметре response мы получаем все переданные из Drupal\craft\Ajax\ScrollToCommand::render() значения и выполняем необходимый набор действий.
+
+Осталось дело за малым: в нашем контролере импортируем класс с описанной командой и вызываем его.
+
+```
+// Определяем область видимости нашего класса.
+namespace Drupal\cusom_ajax\Controller;
+
+// Указываем зависимости.
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\craft\Ajax\ScrollToCommand;
+
+/**
+ * Определяем контролер CustomAjaxController.
+ */
+class CustomAjaxController extends ControllerBase {
+
+  public function ajax_show_message() {
+    // Создаем экземпляр класса AjaxResponse().
+    $response = new AjaxResponse();
+
+    // Добавляем нашу команду scrollTo со сдвигом -90px.
+    $response->addCommand(new ScrollToCommand('#custom-block-selector', -90));
+    //Возвращаем набор команд для выполнения.
+    return $response;
+  }
+
+}
+
+```
+
+На этом все. Теперь вы можете создавать свои команды. Но всегда помните, если ваша задача решается парой предустановленных комманд, то писать свою команду нет смысла.
